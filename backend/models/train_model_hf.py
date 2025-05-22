@@ -149,8 +149,8 @@ def main():
    model_name = 'gpt2'
    output_dir = '../models/tuned_gpt2'
    overwrite_output_dir = True
-   batch_size = 8
-   epochs = 3
+   batch_size = 4
+   epochs = 5
 
    print(f"Model: {model_name}")
    print(f"Output directory: {output_dir}")
@@ -176,12 +176,12 @@ def main():
    # Evaluation
    print("Training Results...")
 
-   print(f"Global Step: {model.global_step}")
-   print(f"Epoch: {model.metrics['epoch']}")
-   print(f"Train Runtime: {model.metrics['train_runtime']:.2f} seconds")
-   print(f"Train Samples Per Second: {model.metrics['train_samples_per_second']:.3f}")
-   print(f"Train Steps Per Second: {model.metrics['train_steps_per_second']:.3f}")
-   print(f"Train Loss: {model.metrics['train_loss']:.6f}")
+   print(f"Global Step: {model[0].global_step}")
+   print(f"Epoch: {model[0].metrics['epoch']}")
+   print(f"Train Runtime: {model[0].metrics['train_runtime']:.2f} seconds")
+   print(f"Train Samples Per Second: {model[0].metrics['train_samples_per_second']:.3f}")
+   print(f"Train Steps Per Second: {model[0].metrics['train_steps_per_second']:.3f}")
+   print(f"Train Loss: {model[0].metrics['train_loss']:.6f}")
    print()
 
    # Generation Functions
