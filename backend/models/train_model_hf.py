@@ -65,7 +65,7 @@ def train_model(train_file_path, model_name, output_dir, overwrite_output_dir,
        per_device_train_batch_size=per_device_train_batch_size,
        logging_dir="./logs",
        logging_steps=100,
-       save_steps=500,
+       save_steps=50,
        logging_first_step=True,
        save_total_limit=2,
        learning_rate=0.0001,
@@ -146,25 +146,25 @@ def main():
    model_name = 'gpt2'
    output_dir = '../models/tuned_gpt2'
    overwrite_output_dir = True
-   per_device_train_batch_size = 8
-   num_train_epochs = 3
+   batch_size = 8
+   epochs = 3
 
    print(f"Model: {model_name}")
    print(f"Output directory: {output_dir}")
-   print(f"Batch size: {per_device_train_batch_size}")
-   print(f"Epochs: {num_train_epochs}")
+   print(f"Batch size: {batch_size}")
+   print(f"Epochs: {epochs}")
    print()
 
    #Training
    print("Loading model...")
 
-   trainer, hist = train_model(
+   model = train_model(
        train_file_path=train_file_path,
        model_name=model_name,
        output_dir=output_dir,
        overwrite_output_dir=overwrite_output_dir,
-       per_device_train_batch_size=per_device_train_batch_size,
-       num_train_epochs=num_train_epochs,
+       per_device_train_batch_size=batch_size,
+       num_train_epochs=epochs,
    )
 
    print("Training completed!")
@@ -173,12 +173,12 @@ def main():
    # Evaluation
    print("Training Results...")
 
-   print(f"Global Step: {hist.global_step}")
-   print(f"Epoch: {hist.metrics['epoch']}")
-   print(f"Train Runtime: {hist.metrics['train_runtime']:.2f} seconds")
-   print(f"Train Samples Per Second: {hist.metrics['train_samples_per_second']:.3f}")
-   print(f"Train Steps Per Second: {hist.metrics['train_steps_per_second']:.3f}")
-   print(f"Train Loss: {hist.metrics['train_loss']:.6f}")
+   print(f"Global Step: {model.global_step}")
+   print(f"Epoch: {model.metrics['epoch']}")
+   print(f"Train Runtime: {model.metrics['train_runtime']:.2f} seconds")
+   print(f"Train Samples Per Second: {model.metrics['train_samples_per_second']:.3f}")
+   print(f"Train Steps Per Second: {model.metrics['train_steps_per_second']:.3f}")
+   print(f"Train Loss: {model.metrics['train_loss']:.6f}")
    print()
 
    # Generation Functions

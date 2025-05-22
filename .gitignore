@@ -154,4 +154,4 @@ cython_debug/
 
 #Files
 backend/models/train_model.py
-backend/models/tuned_gpt2/
+backend/models/tuned_gpt2/*
