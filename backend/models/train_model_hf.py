@@ -65,7 +65,7 @@ def train_model(train_file_path, model_name, output_dir, overwrite_output_dir,
        per_device_train_batch_size=per_device_train_batch_size,
        logging_dir="./logs",
        logging_steps=100,
-       save_steps=50,
+       save_steps=100,
        logging_first_step=True,
        save_total_limit=2,
        learning_rate=0.0001,
@@ -150,7 +150,7 @@ def main():
    output_dir = '../models/tuned_gpt2'
    overwrite_output_dir = True
    batch_size = 4
-   epochs = 5
+   epochs = 10
 
    print(f"Model: {model_name}")
    print(f"Output directory: {output_dir}")
@@ -176,12 +176,12 @@ def main():
    # Evaluation
    print("Training Results...")
 
-   print(f"Global Step: {model[0].global_step}")
-   print(f"Epoch: {model[0].metrics['epoch']}")
-   print(f"Train Runtime: {model[0].metrics['train_runtime']:.2f} seconds")
-   print(f"Train Samples Per Second: {model[0].metrics['train_samples_per_second']:.3f}")
-   print(f"Train Steps Per Second: {model[0].metrics['train_steps_per_second']:.3f}")
-   print(f"Train Loss: {model[0].metrics['train_loss']:.6f}")
+   print(f"Global Step: {model[1].global_step}")
+   print(f"Epoch: {model[1].metrics['epoch']}")
+   print(f"Train Runtime: {model[1].metrics['train_runtime']:.2f} seconds")
+   print(f"Train Samples Per Second: {model[1].metrics['train_samples_per_second']:.3f}")
+   print(f"Train Steps Per Second: {model[1].metrics['train_steps_per_second']:.3f}")
+   print(f"Train Loss: {model[1].metrics['train_loss']:.6f}")
    print()
 
    # Generation Functions
