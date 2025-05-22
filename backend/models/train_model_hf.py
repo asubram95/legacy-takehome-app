@@ -1,5 +1,3 @@
-# train_gpt2_mental_health.py
-
 from transformers import (
    TextDataset, 
    DataCollatorForLanguageModeling,
@@ -184,9 +182,6 @@ def main():
    print(f"Train Loss: {model[1].metrics['train_loss']:.6f}")
    print()
 
-   # Generation Functions
-   print("Generation Functions...")
-
    #Test Generation
    print("Testing Generation...")
 
@@ -217,4 +212,4 @@ def main():
    print("\nTraining and testing completed successfully!")
 
 if __name__ == "__main__":
-   main()
+   main()  
