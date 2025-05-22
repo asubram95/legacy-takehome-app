@@ -71,6 +71,9 @@ def train_model(train_file_path, model_name, output_dir, overwrite_output_dir,
        learning_rate=0.0001,
        warmup_steps=50,
        dataloader_num_workers=4,
+       no_cuda=False, 
+       dataloader_pin_memory=True,
+       fp16=True,
    )
    
    trainer = Trainer(
