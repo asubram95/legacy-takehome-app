@@ -69,7 +69,7 @@ export default function MentalHealthAssistant() {
 
   const clearForm = (): void => {
     setInput("");
-    // setSuggestion('');
+    setSuggestion('');
     setError("");
   };
 

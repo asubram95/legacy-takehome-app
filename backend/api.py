@@ -158,36 +158,15 @@ def is_meaningful_text(text: str) -> bool:
     if re.search(r'(.)\1{3,}', cleaned):  
         return False
     
-    # Check for mostly numbers
+    # Check for numbers
     if re.search(r'^[\d\s]{3,}$', text.strip()): 
         return False
-    
-    # Check for keyboard mashing patterns
-    keyboard_patterns = [
-        r'[qwertyuiop]{4,}',  
-        r'[asdfghjkl]{4,}',
-        r'[zxcvbnm]{4,}',
-        r'[qaz]{3,}',  
-        r'[wsx]{3,}',
-        r'[edc]{3,}',
-    ]
-    
-    for pattern in keyboard_patterns:
-        if re.search(pattern, cleaned):
-            return False
     
     # Check for minimum word count 
     words = text.strip().split()
     meaningful_words = [word for word in words if len(word) >= 3 and not word.isdigit()]
     
-    if len(meaningful_words) < 5:
-        return False
-    
-    # Check for reasonable vowel/consonant ratio (basic language check)
-    vowels = len(re.findall(r'[aeiouAEIOU]', text))
-    consonants = len(re.findall(r'[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]', text))
-    
-    if consonants > 0 and vowels / (vowels + consonants) < 0.15:  # Less than 15% vowels
+    if len(meaningful_words) < 3:
         return False
     
     return True
