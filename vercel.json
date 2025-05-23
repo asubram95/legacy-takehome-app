@@ -1,0 +1,26 @@
+{
+  "builds": [
+    {
+      "src": "frontend/legacy-takehome-app/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    },
+    {
+      "src": "api/*.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/legacy-takehome-app/dist/$1"
+    }
+  ],
+  "outputDirectory": "frontend/legacy-takehome-app/dist"
+}

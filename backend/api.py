@@ -26,7 +26,7 @@ app = FastAPI(
 # CORS middleware to allow frontend connections
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"], 
+    allow_origins=["http://localhost:5173", "http://localhost:3000", "*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -268,17 +268,21 @@ async def root():
         "health": "/health"
     }
 
-if __name__ == "__main__":
-    # Configuration
-    host = "0.0.0.0"
-    port = 8000
+#vercel
+def handler(request):
+    return app(request)
+
+# if __name__ == "__main__":
+#     # Configuration
+#     host = "0.0.0.0"
+#     port = 8000
     
-    logger.info(f"Starting server on {host}:{port}")
-    logger.info("API Documentation available at: http://localhost:8000/docs")
+#     logger.info(f"Starting server on {host}:{port}")
+#     logger.info("API Documentation available at: http://localhost:8000/docs")
     
-    uvicorn.run(
-        app, 
-        host=host, 
-        port=port,
-        log_level="info"
-    )
+#     uvicorn.run(
+#         app, 
+#         host=host, 
+#         port=port,
+#         log_level="info"
+#     )

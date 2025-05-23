@@ -156,6 +156,7 @@ cython_debug/
 backend/models/train_model.py
 backend/models/tuned_gpt2/*
 backend/models/upload_hf.py
+backend/notebooks/*
 node_modules/.package-lock.json
 node_modules/.bin/autoprefixer
 node_modules/.bin/autoprefixer.cmd
@@ -1108,3 +1109,4 @@ node_modules/update-browserslist-db/LICENSE
 node_modules/update-browserslist-db/package.json
 node_modules/update-browserslist-db/README.md
 node_modules/update-browserslist-db/utils.js
+.vercel
