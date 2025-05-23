@@ -145,7 +145,7 @@ def main():
    print("\nConfiguring training...")
 
    model_name = 'gpt2'
-   output_dir = '../models/tuned_gpt2'
+   output_dir = '../models/tuned_gpt2_tb'
    overwrite_output_dir = True
    batch_size = 4
    epochs = 10
