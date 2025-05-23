@@ -93,7 +93,7 @@ export default function MentalHealthAssistant() {
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                 setInput(e.target.value)
               }
-              placeholder="Example: My patient has been showing signs of increased anxiety during our sessions. They seem reluctant to discuss their feelings and often deflect when I try to explore deeper issues. How can I help them feel more comfortable opening up?"
+              placeholder="Example: My patient has been feeling anxious. How can I help them?"
               className="textarea"
               disabled={loading}
             />

@@ -35,7 +35,7 @@ app.add_middleware(
 # models for request/response
 class AdviceRequest(BaseModel):
     question: str
-    max_length: int = 150
+    max_length: int = 200
     temperature: float = 0.8
     top_k: int = 50
     top_p: float = 0.95
@@ -43,7 +43,7 @@ class AdviceRequest(BaseModel):
 class AdviceResponse(BaseModel):
     answer: str
     success: bool = True
-    message: str = "Successfully generated advice"
+    message: str = "Successfully generated response"
 
 class HealthResponse(BaseModel):
     status: str
@@ -56,8 +56,8 @@ async def load_model():
     global model, tokenizer
     
     try:
-        model_path = "./models/tuned_gpt2"
-        logger.info(f"Loading model from {model_path}...")
+        model_path = "blobbymagn/legacy-app" # Hugging Face model path
+        logger.info(f"Loading model from Hugging Face {model_path}...")
         
         # Load tokenizer
         tokenizer = GPT2Tokenizer.from_pretrained(model_path)
@@ -78,7 +78,7 @@ async def load_model():
         model = None
         tokenizer = None
 
-def generate_response(question: str, max_length: int = 150, temperature: float = 0.8, 
+def generate_response(question: str, max_length: int = 200, temperature: float = 0.8, 
                      top_k: int = 50, top_p: float = 0.95) -> str:
     """Generate a response using the trained model"""
     
@@ -109,8 +109,11 @@ def generate_response(question: str, max_length: int = 150, temperature: float =
         # Decode and clean response
         generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
         answer = generated_text.replace(input_text, "").strip()
+        logger.info(f"Generated response: {answer[:50]}...")
+        cleaned_answer = clean_response(answer)
+        logger.info(f"Cleaned response: {cleaned_answer[:50]}...")
         
-        return answer
+        return cleaned_answer
         
     except Exception as e:
         logger.error(f"Error generating response: {e}")
@@ -175,7 +178,7 @@ def is_meaningful_text(text: str) -> bool:
     
     # Check for minimum word count 
     words = text.strip().split()
-    meaningful_words = [word for word in words if len(word) >= 5 and not word.isdigit()]
+    meaningful_words = [word for word in words if len(word) >= 3 and not word.isdigit()]
     
     if len(meaningful_words) < 5:
         return False
@@ -189,13 +192,41 @@ def is_meaningful_text(text: str) -> bool:
     
     return True
 
+def clean_response(text: str, max_words: int = 200) -> str:
+    """Clean and limit the model response"""
+    
+    text = text.strip()
+
+    # Remove everything after "Question:" (case-insensitive)
+    question_match = re.search(r'\bQuestion:', text, re.IGNORECASE)
+    if question_match:
+        text = text[:question_match.start()].strip()
+    
+    # Split into words and limit
+    words = text.split()
+    if len(words) > max_words:
+        words = words[:max_words]
+        text = ' '.join(words)
+    
+    # Split into sentences
+    sentences = re.split(r'[.!?]+', text)
+    
+    # Use all sentences except the last one
+    if len(sentences) > 1:
+        complete_text = '. '.join(sentences[:-1]) + '.'
+    
+    # Remove extra spaces
+    complete_text = re.sub(r'\s+', ' ', complete_text)  
+
+    
+    return complete_text.strip()
 
 @app.post("/api/generate-advice", response_model=AdviceResponse)
 async def generate_advice(request: AdviceRequest):
     """Generate counseling advice"""
 
     #Sanitize input
-    logger.info("Sanitizing input...")
+    logger.info("Sanitizing input...", sanitize_input(request.question))
     sanitized_question = sanitize_input(request.question)
 
     # Validate input
@@ -222,23 +253,23 @@ async def generate_advice(request: AdviceRequest):
             )
     
     try:
-        logger.info(f"Generating advice for question: {request.question[:50]}...")
+        logger.info(f"Generating response for question: {sanitized_question[:50]}...")
         
         # Generate response
         answer = generate_response(
-            question=request.question,
+            question=sanitized_question,
             max_length=request.max_length,
             temperature=request.temperature,
             top_k=request.top_k,
             top_p=request.top_p
         )
         
-        logger.info("Advice generated successfully!")
+        logger.info("Response generated successfully!")
         
         return AdviceResponse(
             answer=answer,
             success=True,
-            message="Advice generated successfully!"
+            message="Response generated successfully!"
         )
         
     except HTTPException as e:
