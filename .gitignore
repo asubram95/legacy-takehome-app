@@ -155,6 +155,7 @@ cython_debug/
 #Files
 backend/models/train_model.py
 backend/models/tuned_gpt2/*
+backend/models/upload_hf.py
 node_modules/.package-lock.json
 node_modules/.bin/autoprefixer
 node_modules/.bin/autoprefixer.cmd
