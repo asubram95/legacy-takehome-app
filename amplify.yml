@@ -3,11 +3,19 @@ frontend:
   phases:
     preBuild:
       commands:
+        - echo "Current directory:"
+        - pwd
+        - echo "Listing files:"
+        - ls -la
+        - echo "Checking if frontend directory exists:"
+        - ls -la frontend/
         - cd frontend/legacy-takehome-app
-        - npm install
+        - echo "Installing dependencies..."
+        - npm ci
     build:
       commands:
         - cd frontend/legacy-takehome-app
+        - echo "Building application..."
         - npm run build
   artifacts:
     baseDirectory: frontend/legacy-takehome-app/dist
