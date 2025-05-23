@@ -9,7 +9,6 @@
   max-width: 64rem;
   margin: 0 auto;
   align-self: center;
-  margin-top: 5rem;
 }
 
 /* Header Styles */
@@ -212,6 +211,7 @@
   line-height: 1.6;
   margin: 0;
   white-space: pre-wrap;
+  text-align: left;
 }
 
 .disclaimer {

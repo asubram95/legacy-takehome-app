@@ -7,6 +7,7 @@ from transformers import GPT2LMHeadModel, GPT2Tokenizer
 import torch
 import uvicorn
 import logging
+import re
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -124,16 +125,51 @@ async def health_check():
         message="API is running!" if model is not None else "Model not loaded!"
     )
 
+def sanitize_input(text: str) -> str:
+    """Sanitize user input"""
+    # Remove HTML tags and scripts
+    text = re.sub(r'<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'<[^>]*>', '', text)
+    
+    # Remove dangerous patterns
+    text = re.sub(r'javascript:', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'on\w+\s*=', '', text, flags=re.IGNORECASE)
+    
+    # Escape dangerous characters
+    dangerous_chars = {'<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;', '&': '&amp;'}
+    for char, escape in dangerous_chars.items():
+        text = text.replace(char, escape)
+    
+    # Clean up whitespace
+    text = re.sub(r'\s+', ' ', text).strip()
+    
+    return text
+
+
 @app.post("/api/generate-advice", response_model=AdviceResponse)
 async def generate_advice(request: AdviceRequest):
     """Generate counseling advice"""
-    
+
+    #Sanitize input
+    logger.info("Sanitizing input...")
+    sanitized_question = sanitize_input(request.question)
+
     # Validate input
     if not request.question.strip():
-        raise HTTPException(status_code=400, detail="Question cannot be empty")
+        raise HTTPException(
+            status_code=400, 
+            detail="Please enter patient challenge.")
     
     if len(request.question.strip()) < 10:
-        raise HTTPException(status_code=400, detail="Please provide a more detailed question")
+        raise HTTPException(
+            status_code=400, 
+            detail="Please provide a more detailed description.")
+    
+    if len(sanitized_question) > 2000:
+        raise HTTPException(
+            status_code=400, 
+            detail="Your description is too long. Please keep it under 2000 characters."
+            )
     
     try:
         logger.info(f"Generating advice for question: {request.question[:50]}...")
