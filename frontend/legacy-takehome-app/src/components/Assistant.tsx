@@ -67,7 +67,7 @@ export default function MentalHealthAssistant() {
         {/* Header */}
         <div className="header">
           <h1 className="title">
-            Mental Health Counseling Assistant
+            Mental Health Counseling Assistant 
           </h1>
         </div>
 
@@ -75,7 +75,7 @@ export default function MentalHealthAssistant() {
         <div className="form-card">
           <div className="input-section">
             <label htmlFor="challenge" className="label">
-              Describe your patient challenge:
+              Describe your patient challenge 🥼📋:
             </label>
             <textarea
               id="challenge"
@@ -107,7 +107,7 @@ export default function MentalHealthAssistant() {
               {loading ? (
                 <span className="loading-content">
                   <span className="spinner"></span>
-                  Generating Guidance...
+                  Generating response...
                 </span>
               ) : (
                 'Get suggestion'

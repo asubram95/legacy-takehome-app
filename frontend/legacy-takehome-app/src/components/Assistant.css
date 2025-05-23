@@ -53,6 +53,7 @@
   font-weight: 500;
   color: #374151;
   margin-bottom: 0.75rem;
+  text-align: left;
 }
 
 .textarea {
@@ -89,6 +90,7 @@
   color: #6b7280;
   margin-top: 0.5rem;
   margin-bottom: 0;
+  text-align: left;
 }
 
 /* Error Message */

@@ -1,62 +1,188 @@
+# api_server.py
+
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 import torch
 import uvicorn
+import logging
 
-# Load your trained model once at startup
-MODEL_PATH = "../models/tuned_gpt2"
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Global variables for model and tokenizer
 model = None
 tokenizer = None
 
-app = FastAPI()
+app = FastAPI(
+    title="Mental Health Counseling Assistant API",
+    description="AI-powered guidance for mental health professionals",
+    version="1.0.0"
+)
 
-class QuestionRequest(BaseModel):
+# CORS middleware to allow frontend connections
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://localhost:3000"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# models for request/response
+class AdviceRequest(BaseModel):
     question: str
     max_length: int = 150
+    temperature: float = 0.8
+    top_k: int = 50
+    top_p: float = 0.95
 
-class AnswerResponse(BaseModel):
+class AdviceResponse(BaseModel):
     answer: str
+    success: bool = True
+    message: str = "Successfully generated advice"
+
+class HealthResponse(BaseModel):
+    status: str
+    model_loaded: bool
+    message: str
 
 @app.on_event("startup")
 async def load_model():
+    """Load the trained model and tokenizer on startup"""
     global model, tokenizer
-    print("Loading trained model...")
-    model = GPT2LMHeadModel.from_pretrained(MODEL_PATH)
-    tokenizer = GPT2Tokenizer.from_pretrained(MODEL_PATH)
-    print("Model loaded successfully!")
+    
+    try:
+        model_path = "./models/tuned_gpt2"
+        logger.info(f"Loading model from {model_path}...")
+        
+        # Load tokenizer
+        tokenizer = GPT2Tokenizer.from_pretrained(model_path)
+        logger.info("Tokenizer loaded successfully")
+        
+        # Load model
+        model = GPT2LMHeadModel.from_pretrained(model_path)
+        
+        # Use GPU if available
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        model.to(device)
+        model.eval()  # Set to evaluation mode
+        
+        logger.info(f"Model loaded successfully on {device}")
+        
+    except Exception as e:
+        logger.error(f"Failed to load model: {e}")
+        model = None
+        tokenizer = None
 
-@app.post("/generate-advice", response_model=AnswerResponse)
-async def generate_advice(request: QuestionRequest):
+def generate_response(question: str, max_length: int = 150, temperature: float = 0.8, 
+                     top_k: int = 50, top_p: float = 0.95) -> str:
+    """Generate a response using the trained model"""
+    
+    if model is None or tokenizer is None:
+        raise HTTPException(status_code=503, detail="Model not loaded")
+    
     try:
         # Format input like training data
-        input_text = f"Question: {request.question} Answer:"
+        input_text = f"Question: {question} Answer:"
+        
+        # Tokenize input
+        device = next(model.parameters()).device
+        ids = tokenizer.encode(input_text, return_tensors='pt').to(device)
         
         # Generate response
-        ids = tokenizer.encode(input_text, return_tensors='pt')
         with torch.no_grad():
             outputs = model.generate(
                 ids,
                 do_sample=True,
-                max_length=request.max_length,
+                max_length=max_length,
                 pad_token_id=tokenizer.eos_token_id,
-                top_k=50,
-                top_p=0.95,
-                temperature=0.8,
+                top_k=top_k,
+                top_p=top_p,
+                temperature=temperature,
+                num_return_sequences=1,
             )
         
-        # Extract answer
+        # Decode and clean response
         generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
         answer = generated_text.replace(input_text, "").strip()
         
-        return AnswerResponse(answer=answer)
-    
+        return answer
+        
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Error generating response: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate response: {str(e)}")
 
-@app.get("/health")
+@app.get("/health", response_model=HealthResponse)
 async def health_check():
-    return {"status": "healthy", "model_loaded": model is not None}
+    """Health check endpoint"""
+    return HealthResponse(
+        status="healthy" if model is not None else "unhealthy",
+        model_loaded=model is not None,
+        message="API is running!" if model is not None else "Model not loaded!"
+    )
+
+@app.post("/api/generate-advice", response_model=AdviceResponse)
+async def generate_advice(request: AdviceRequest):
+    """Generate counseling advice"""
+    
+    # Validate input
+    if not request.question.strip():
+        raise HTTPException(status_code=400, detail="Question cannot be empty")
+    
+    if len(request.question.strip()) < 10:
+        raise HTTPException(status_code=400, detail="Please provide a more detailed question")
+    
+    try:
+        logger.info(f"Generating advice for question: {request.question[:50]}...")
+        
+        # Generate response
+        answer = generate_response(
+            question=request.question,
+            max_length=request.max_length,
+            temperature=request.temperature,
+            top_k=request.top_k,
+            top_p=request.top_p
+        )
+        
+        logger.info("Advice generated successfully!")
+        
+        return AdviceResponse(
+            answer=answer,
+            success=True,
+            message="Advice generated successfully!"
+        )
+        
+    except HTTPException as e:
+        # Re-raise HTTP exceptions
+        raise e
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@app.get("/")
+async def root():
+    """Root endpoint"""
+    return {
+        "message": "Mental Health Counseling Assistant API",
+        "status": "running",
+        "docs": "/docs",
+        "health": "/health"
+    }
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    # Configuration
+    host = "0.0.0.0"
+    port = 8000
+    
+    logger.info(f"Starting server on {host}:{port}")
+    logger.info("API Documentation available at: http://localhost:8000/docs")
+    
+    uvicorn.run(
+        app, 
+        host=host, 
+        port=port,
+        log_level="info"
+    )
