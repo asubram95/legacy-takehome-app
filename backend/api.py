@@ -145,6 +145,50 @@ def sanitize_input(text: str) -> str:
     
     return text
 
+def is_meaningful_text(text: str) -> bool:
+    """Check if text contains meaningful content"""
+    
+    # Remove whitespace and convert to lowercase
+    cleaned = re.sub(r'\s+', '', text.lower())
+    
+    # Check for repeated characters 
+    if re.search(r'(.)\1{3,}', cleaned):  
+        return False
+    
+    # Check for mostly numbers
+    if re.search(r'^[\d\s]{3,}$', text.strip()): 
+        return False
+    
+    # Check for keyboard mashing patterns
+    keyboard_patterns = [
+        r'[qwertyuiop]{4,}',  
+        r'[asdfghjkl]{4,}',
+        r'[zxcvbnm]{4,}',
+        r'[qaz]{3,}',  
+        r'[wsx]{3,}',
+        r'[edc]{3,}',
+    ]
+    
+    for pattern in keyboard_patterns:
+        if re.search(pattern, cleaned):
+            return False
+    
+    # Check for minimum word count 
+    words = text.strip().split()
+    meaningful_words = [word for word in words if len(word) >= 5 and not word.isdigit()]
+    
+    if len(meaningful_words) < 5:
+        return False
+    
+    # Check for reasonable vowel/consonant ratio (basic language check)
+    vowels = len(re.findall(r'[aeiouAEIOU]', text))
+    consonants = len(re.findall(r'[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]', text))
+    
+    if consonants > 0 and vowels / (vowels + consonants) < 0.15:  # Less than 15% vowels
+        return False
+    
+    return True
+
 
 @app.post("/api/generate-advice", response_model=AdviceResponse)
 async def generate_advice(request: AdviceRequest):
@@ -168,7 +212,13 @@ async def generate_advice(request: AdviceRequest):
     if len(sanitized_question) > 2000:
         raise HTTPException(
             status_code=400, 
-            detail="Your description is too long. Please keep it under 2000 characters."
+            detail="Your description is too long. Please reduce it to under 2000 characters."
+            )
+    
+    if not is_meaningful_text(sanitized_question):
+        raise HTTPException(
+            status_code=400, 
+            detail="Please provide a more detailed description."
             )
     
     try:
