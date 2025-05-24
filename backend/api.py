@@ -112,7 +112,7 @@ def generate_response(question: str, max_length: int = 200, temperature: float =
                 top_p=top_p,
                 temperature=temperature,
                 num_return_sequences=1,
-                attention_mask=attention_mask.unsqueeze(0),
+                # attention_mask=attention_mask.unsqueeze(0),
             )
         
         # Decode and clean response
