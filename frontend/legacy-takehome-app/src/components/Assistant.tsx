@@ -36,7 +36,7 @@ export default function MentalHealthAssistant() {
       };
 
       const response = await fetch(
-        "legacy-takehome-production.up.railway.app/api/generate-advice",
+        "https://legacy-takehome-production.up.railway.app/api/generate-advice",
         {
           method: "POST",
           headers: {
@@ -69,7 +69,7 @@ export default function MentalHealthAssistant() {
 
   const clearForm = (): void => {
     setInput("");
-    setSuggestion('');
+    setSuggestion("");
     setError("");
   };
 
