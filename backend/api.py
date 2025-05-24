@@ -104,6 +104,7 @@ def generate_response(question: str, max_length: int = 200, temperature: float =
         # Tokenize input
         device = next(model.parameters()).device
         ids = tokenizer.encode(input_text, return_tensors='pt').to(device)
+        attention_mask = torch.ones_like(ids)
         
         # Generate response
         with torch.no_grad():
@@ -116,8 +117,9 @@ def generate_response(question: str, max_length: int = 200, temperature: float =
                 top_p=top_p,
                 temperature=temperature,
                 num_return_sequences=1,
+                attention_mask=attention_mask,
             )
-            
+
         # Decode and clean response
         generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
         answer = generated_text.replace(input_text, "").strip()
