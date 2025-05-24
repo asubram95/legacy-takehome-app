@@ -8,6 +8,7 @@ import torch
 import uvicorn
 import logging
 import re
+import os
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -26,7 +27,11 @@ app = FastAPI(
 # CORS middleware to allow frontend connections
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"], 
+    allow_origins=[
+        "http://localhost:5173", 
+        "http://localhost:3000", 
+        "https://legacy-takehome-app.vercel.app/"
+        ], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -271,7 +276,7 @@ async def root():
 if __name__ == "__main__":
     # Configuration
     host = "0.0.0.0"
-    port = 8000
+    port = int(os.environ.get("PORT", 8000)) 
     
     logger.info(f"Starting server on {host}:{port}")
     logger.info("API Documentation available at: http://localhost:8000/docs")
