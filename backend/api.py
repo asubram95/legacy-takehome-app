@@ -68,8 +68,13 @@ async def load_model():
         
         # Load tokenizer
         tokenizer = GPT2Tokenizer.from_pretrained(model_path)
-        logger.info("Tokenizer loaded successfully")
+
+        if tokenizer.pad_token is None:
+            tokenizer.pad_token = tokenizer.eos_token
+            tokenizer.pad_token_id = tokenizer.eos_token_id
         
+        logger.info("Tokenizer loaded successfully")
+
         # Load model
         model = GPT2LMHeadModel.from_pretrained(model_path)
         
@@ -106,14 +111,13 @@ def generate_response(question: str, max_length: int = 200, temperature: float =
                 ids,
                 do_sample=True,
                 max_length=max_length,
-                pad_token_id=tokenizer.eos_token_id,
+                pad_token_id=tokenizer.pad_token_id,
                 top_k=top_k,
                 top_p=top_p,
                 temperature=temperature,
                 num_return_sequences=1,
-                # attention_mask=attention_mask.unsqueeze(0),
             )
-        
+            
         # Decode and clean response
         generated_text = tokenizer.decode(outputs[0], skip_special_tokens=True)
         answer = generated_text.replace(input_text, "").strip()
