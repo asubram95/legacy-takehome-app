@@ -10,6 +10,8 @@ import logging
 import re
 import os
 
+os.environ['TRANSFORMERS_VERBOSITY'] = 'error'  # Suppress transformer warnings
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -110,7 +112,7 @@ def generate_response(question: str, max_length: int = 200, temperature: float =
                 top_p=top_p,
                 temperature=temperature,
                 num_return_sequences=1,
-                attention_mask=attention_mask
+                attention_mask=attention_mask.unsqueeze(0),
             )
         
         # Decode and clean response
