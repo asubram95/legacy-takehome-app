@@ -99,7 +99,6 @@ def generate_response(question: str, max_length: int = 200, temperature: float =
         # Tokenize input
         device = next(model.parameters()).device
         ids = tokenizer.encode(input_text, return_tensors='pt').to(device)
-        attention_mask = ids["attention_mask"]
         
         # Generate response
         with torch.no_grad():
