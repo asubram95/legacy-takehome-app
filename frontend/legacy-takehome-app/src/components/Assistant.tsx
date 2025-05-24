@@ -29,14 +29,14 @@ export default function MentalHealthAssistant() {
     setSuggestion("");
 
     try {
-      // Call your FastAPI server
+      // Call FastAPI server
       const requestBody: ApiRequest = {
         question: input,
         max_length: 200,
       };
 
       const response = await fetch(
-        "http://localhost:8000/api/generate-advice",
+        "legacy-takehome-production.up.railway.app",
         {
           method: "POST",
           headers: {
